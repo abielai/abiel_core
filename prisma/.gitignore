@@ -1,0 +1,11 @@
+# Prisma
+.env
+.env.local
+.env.*.local
+
+# Migraciones (generadas localmente, no commiteadas)
+migrations/
+
+# Logs
+logs/
+*.log

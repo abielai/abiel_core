@@ -1,0 +1,16 @@
+{
+  "name": "@abiel/api",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "echo \"API dev server placeholder\"",
+    "build": "echo \"API build placeholder\"",
+    "test": "vitest"
+  },
+  "dependencies": {
+    "@abiel/shared": "workspace:*"
+  },
+  "devDependencies": {
+    "vitest": "^1.0.0"
+  }
+}

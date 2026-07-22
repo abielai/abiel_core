@@ -1,0 +1,78 @@
+// Prisma schema for Abiel - Multi-tenant SaaS
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Empresa: Raíz del tenant. Cada registro es un cliente independiente.
+model Empresa {
+  id        String   @id @default(cuid())
+  tenantId  String   @db.VarChar(255)
+  nombre    String   @db.VarChar(255)
+  activa    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relaciones
+  usuarios  Usuario[]
+  mensajes  Mensaje[]
+
+  // Índice compuesto para aislamiento seguro por tenant
+  @@unique([tenantId, id], name: "uk_empresa_tenant_id")
+  @@index([tenantId], name: "idx_empresa_tenant")
+  @@map("empresas")
+}
+
+// Usuario: Vinculado a Empresa. Un usuario pertenece a una única empresa.
+model Usuario {
+  id        String   @id @default(cuid())
+  tenantId  String   @db.VarChar(255)
+  empresaId String
+  nombre    String   @db.VarChar(255)
+  email     String   @db.VarChar(255)
+  activo    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relación con Empresa
+  empresa   Empresa  @relation(fields: [empresaId], references: [id], onDelete: Cascade)
+
+  // Relaciones
+  mensajes  Mensaje[]
+
+  // Índices para segmentación segura por tenant
+  @@unique([tenantId, id], name: "uk_usuario_tenant_id")
+  @@unique([tenantId, email], name: "uk_usuario_tenant_email")
+  @@index([tenantId], name: "idx_usuario_tenant")
+  @@index([empresaId], name: "idx_usuario_empresa")
+  @@map("usuarios")
+}
+
+// Mensaje: Vinculado a Usuario y Empresa. Datos transaccionales del cliente.
+model Mensaje {
+  id        String   @id @default(cuid())
+  tenantId  String   @db.VarChar(255)
+  empresaId String
+  usuarioId String
+  contenido String   @db.Text
+  leido     Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relaciones
+  empresa   Empresa  @relation(fields: [empresaId], references: [id], onDelete: Cascade)
+  usuario   Usuario  @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+
+  // Índices para segmentación segura por tenant y acceso eficiente
+  @@unique([tenantId, id], name: "uk_mensaje_tenant_id")
+  @@index([tenantId], name: "idx_mensaje_tenant")
+  @@index([empresaId], name: "idx_mensaje_empresa")
+  @@index([usuarioId], name: "idx_mensaje_usuario")
+  @@index([tenantId, empresaId], name: "idx_mensaje_tenant_empresa")
+  @@map("mensajes")
+}

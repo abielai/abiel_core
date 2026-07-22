@@ -1,0 +1,9 @@
+{
+  "name": "@abiel/web-customer",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "echo \"Customer web dev server placeholder\"",
+    "build": "echo \"Customer web build placeholder\""
+  }
+}

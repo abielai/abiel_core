@@ -15,5 +15,8 @@ Este archivo recoge alertas, riesgos y mejoras que surjan durante el desarrollo.
 - Se recomienda mantener este protocolo como estándar para evitar pérdida de contexto y re-trabajo.
 
 ## 2026-07-22
+- Se generó un pront operativo para Base de Datos para definir el modelo de datos del backend y el diseño de aislamiento multi-tenant de Abiel Core, alineado con la arquitectura y los contratos mínimos ya definidos.
+
+## 2026-07-22
 - Se identificó la necesidad de reforzar la claridad operativa: cada rol debe trabajar con un formato de salida claro, criterios de aceptación y registro de bloqueos.
 - Esto reduce ambigüedades, acelera la coordinación y mejora la trazabilidad.
