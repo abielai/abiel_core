@@ -1,0 +1,62 @@
+# Node modules
+/node_modules/
+
+# pnpm store
+.pnpm-store/
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+logs/
+*.log
+
+# Runtime data
+pids/
+*.pid
+*.seed
+*.pid.lock
+
+# Dependency directories
+/.pnp/
+.pnp.js
+
+# Build output
+/dist/
+/build/
+/out/
+
+# Coverage
+/coverage/
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# IDEs and editors
+.vscode/
+.idea/
+*.sublime-workspace
+*.sublime-project
+
+# Mac files
+.DS_Store
+
+# Misc
+.cache/
+.tmp/
+*.tgz
+
+# Prisma client (generated)
+/prisma/generated/
+
+# Docker
+docker-compose.override.yml
+
+# Test artefacts
+*.tsbuildinfo
+
+# System files
+Thumbs.db
