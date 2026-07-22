@@ -1,0 +1,85 @@
+name: CI
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: abiel
+          POSTGRES_PASSWORD: abiel123
+          POSTGRES_DB: abiel_ci
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready -U abiel
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Wait for Postgres to be ready
+        run: |
+          echo "Waiting for Postgres..."
+          sleep 12
+
+      - name: Configure DATABASE_URL
+        run: echo "DATABASE_URL=postgresql://abiel:abiel123@127.0.0.1:5432/abiel_ci" >> $GITHUB_ENV
+
+      - name: Apply Prisma schema
+        run: pnpm -w prisma db push --accept-data-loss
+
+      - name: Run API tests
+        run: pnpm test --filter @abiel/api
+name: CI
+
+on:
+  push:
+    branches: [master, main]
+  pull_request:
+
+jobs:
+  test-api:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Enable pnpm
+        run: corepack enable
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Run API tests
+        run: pnpm test
