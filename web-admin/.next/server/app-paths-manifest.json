@@ -1,0 +1,10 @@
+{
+  "/api/validate/route": "app/api/validate/route.js",
+  "/auth/page": "app/auth/page.js",
+  "/auth/empresa/page": "app/auth/empresa/page.js",
+  "/auth/usuarios/page": "app/auth/usuarios/page.js",
+  "/auth/mensajes/page": "app/auth/mensajes/page.js",
+  "/auth/plantillas/page": "app/auth/plantillas/page.js",
+  "/auth/pront/page": "app/auth/pront/page.js",
+  "/auth/ai/page": "app/auth/ai/page.js"
+}

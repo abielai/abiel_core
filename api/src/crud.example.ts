@@ -348,12 +348,101 @@ export async function marcarMensajeComoLeido(tenantId: string, mensajeId: string
   }
 
   const actualizado = await prisma.mensaje.update({
-    where: { id: mensajeId },
+    where: { id: mensajeId, tenantId },
     data: { leido: true }
   })
 
   console.log(`✅ Mensaje marcado como leído`)
   return actualizado
+}
+
+// ============================================================================
+// CRUD: BUFFER
+// ============================================================================
+
+export async function crearBuffer(tenantId: string, empresaId: string, estado: string, payload: Record<string, unknown>) {
+  console.log(`[BUFFER] Creando buffer para empresa "${empresaId}" del tenant "${tenantId}"`)
+
+  const empresaValida = await validarEmpresaEnTenant(tenantId, empresaId)
+  if (!empresaValida) {
+    console.log(`❌ Empresa no válida para este tenant`)
+    return null
+  }
+
+  const buffer = await prisma.buffer.create({
+    data: {
+      tenantId,
+      empresaId,
+      estado,
+      payload
+    }
+  })
+
+  console.log(`✅ Buffer creado:`, buffer)
+  return buffer
+}
+
+export async function obtenerBuffer(tenantId: string, bufferId: string) {
+  console.log(`[BUFFER] Obteniendo buffer "${bufferId}" del tenant "${tenantId}"`)
+
+  const buffer = await prisma.buffer.findFirst({
+    where: {
+      id: bufferId,
+      tenantId
+    }
+  })
+
+  if (!buffer) {
+    console.log(`❌ Buffer no encontrado o no pertenece a este tenant`)
+    return null
+  }
+
+  return buffer
+}
+
+// ============================================================================
+// CRUD: PLANTILLA
+// ============================================================================
+
+export async function crearPlantilla(tenantId: string, empresaId: string, nombre: string, contenido: string) {
+  console.log(`[PLANTILLA] Creando plantilla "${nombre}" para tenant "${tenantId}"`)
+
+  const empresaValida = await validarEmpresaEnTenant(tenantId, empresaId)
+  if (!empresaValida) {
+    console.log(`❌ Empresa no válida para este tenant`)
+    return null
+  }
+
+  const plantilla = await prisma.plantilla.create({
+    data: {
+      tenantId,
+      empresaId,
+      nombre,
+      contenido,
+      activa: true
+    }
+  })
+
+  console.log(`✅ Plantilla creada:`, plantilla)
+  return plantilla
+}
+
+export async function obtenerPlantilla(tenantId: string, plantillaId: string) {
+  console.log(`[PLANTILLA] Obteniendo plantilla "${plantillaId}" del tenant "${tenantId}"`)
+
+  const plantilla = await prisma.plantilla.findFirst({
+    where: {
+      id: plantillaId,
+      tenantId
+    }
+  })
+
+  if (!plantilla) {
+    console.log(`❌ Plantilla no encontrada o no pertenece a este tenant`)
+    return null
+  }
+
+  return plantilla
 }
 
 // ============================================================================
@@ -419,3 +508,5 @@ export async function ejemploCompleto() {
 export const crudEmpresas = { crearEmpresa, obtenerEmpresa, listarEmpresas, actualizarEmpresa, eliminarEmpresa }
 export const crudUsuarios = { crearUsuario, obtenerUsuario, listarUsuariosPorEmpresa }
 export const crudMensajes = { crearMensaje, obtenerMensaje, listarMensajes, marcarMensajeComoLeido }
+export const crudBuffers = { crearBuffer, obtenerBuffer }
+export const crudPlantillas = { crearPlantilla, obtenerPlantilla }

@@ -1,0 +1,15 @@
+{
+  "compilerOptions": {
+    "target": "ES2020",
+    "module": "CommonJS",
+    "moduleResolution": "Node",
+    "esModuleInterop": true,
+    "strict": false,
+    "skipLibCheck": true,
+    "baseUrl": ".",
+    "paths": {
+      "@abiel/shared": ["shared/src/index.ts"]
+    }
+  },
+  "include": ["api/src/**/*.ts", "shared/src/**/*.ts"]
+}

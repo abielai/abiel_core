@@ -11,18 +11,19 @@ datasource db {
 
 // Empresa: Raíz del tenant. Cada registro es un cliente independiente.
 model Empresa {
-  id        String   @id @default(cuid())
-  tenantId  String   @db.VarChar(255)
-  nombre    String   @db.VarChar(255)
-  activa    Boolean  @default(true)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id                     String      @id @default(cuid())
+  tenantId               String      @db.VarChar(255)
+  nombre                 String      @db.VarChar(255)
+  activa                 Boolean     @default(true)
+  configuracionMensajeria Json?
+  createdAt              DateTime    @default(now())
+  updatedAt              DateTime    @updatedAt
 
-  // Relaciones
-  usuarios  Usuario[]
-  mensajes  Mensaje[]
+  usuarios               Usuario[]
+  mensajes               Mensaje[]
+  buffers                Buffer[]
+  plantillas             Plantilla[]
 
-  // Índice compuesto para aislamiento seguro por tenant
   @@unique([tenantId, id], name: "uk_empresa_tenant_id")
   @@index([tenantId], name: "idx_empresa_tenant")
   @@map("empresas")
@@ -39,13 +40,9 @@ model Usuario {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  // Relación con Empresa
   empresa   Empresa  @relation(fields: [empresaId], references: [id], onDelete: Cascade)
-
-  // Relaciones
   mensajes  Mensaje[]
 
-  // Índices para segmentación segura por tenant
   @@unique([tenantId, id], name: "uk_usuario_tenant_id")
   @@unique([tenantId, email], name: "uk_usuario_tenant_email")
   @@index([tenantId], name: "idx_usuario_tenant")
@@ -58,21 +55,72 @@ model Mensaje {
   id        String   @id @default(cuid())
   tenantId  String   @db.VarChar(255)
   empresaId String
-  usuarioId String
+  usuarioId String?
   contenido String   @db.Text
   leido     Boolean  @default(false)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  // Relaciones
   empresa   Empresa  @relation(fields: [empresaId], references: [id], onDelete: Cascade)
-  usuario   Usuario  @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+  usuario   Usuario? @relation(fields: [usuarioId], references: [id], onDelete: SetNull)
 
-  // Índices para segmentación segura por tenant y acceso eficiente
   @@unique([tenantId, id], name: "uk_mensaje_tenant_id")
   @@index([tenantId], name: "idx_mensaje_tenant")
   @@index([empresaId], name: "idx_mensaje_empresa")
   @@index([usuarioId], name: "idx_mensaje_usuario")
   @@index([tenantId, empresaId], name: "idx_mensaje_tenant_empresa")
   @@map("mensajes")
+}
+
+// Buffer: Acumula eventos o mensajes temporales antes de orquestación.
+model Buffer {
+  id        String   @id @default(cuid())
+  tenantId  String   @db.VarChar(255)
+  empresaId String
+  estado    String   @db.VarChar(50)
+  payload   Json
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  empresa   Empresa  @relation(fields: [empresaId], references: [id], onDelete: Cascade)
+
+  @@unique([tenantId, id], name: "uk_buffer_tenant_id")
+  @@index([tenantId], name: "idx_buffer_tenant")
+  @@index([empresaId], name: "idx_buffer_empresa")
+  @@map("buffers")
+}
+
+// Plantilla: Respuestas reutilizables por empresa.
+model Plantilla {
+  id        String   @id @default(cuid())
+  tenantId  String   @db.VarChar(255)
+  empresaId String
+  nombre    String   @db.VarChar(255)
+  contenido String   @db.Text
+  activa    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  empresa   Empresa  @relation(fields: [empresaId], references: [id], onDelete: Cascade)
+
+  @@unique([tenantId, id], name: "uk_plantilla_tenant_id")
+  @@index([tenantId], name: "idx_plantilla_tenant")
+  @@index([empresaId], name: "idx_plantilla_empresa")
+  @@map("plantillas")
+}
+
+// Audit: registra cada webhook recibido con su traceId, decisión y payload
+model Audit {
+  id        String   @id @default(cuid())
+  traceId   String   @db.VarChar(255)
+  tenantId  String   @db.VarChar(255)
+  eventId   String?  @db.VarChar(255)
+  decision  String   @db.VarChar(50)
+  reason    String?  @db.VarChar(255)
+  payload   Json
+  createdAt DateTime @default(now())
+
+  @@index([tenantId], name: "idx_audit_tenant")
+  @@index([traceId], name: "idx_audit_trace")
+  @@map("audits")
 }

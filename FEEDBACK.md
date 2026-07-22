@@ -18,5 +18,10 @@ Este archivo recoge alertas, riesgos y mejoras que surjan durante el desarrollo.
 - Se generó un pront operativo para Base de Datos para definir el modelo de datos del backend y el diseño de aislamiento multi-tenant de Abiel Core, alineado con la arquitectura y los contratos mínimos ya definidos.
 
 ## 2026-07-22
+- Revisión arquitectónica de QA: los tests del paquete API pasan (5/5) y el diseño de CRUD respeta la lógica de multi-tenant en lectura y prevalidación de acceso.
+- Riesgo menor detectado: las operaciones destructivas deben reforzar la validación de tenant directamente en la cláusula `where` o en una capa de acceso equivalente para evitar depender solo de prechecks.
+- Acción recomendada: añadir pruebas de integración reales con base de datos de prueba y cubrir CRUD críticos con `vitest --coverage` en CI.
+
+## 2026-07-22
 - Se identificó la necesidad de reforzar la claridad operativa: cada rol debe trabajar con un formato de salida claro, criterios de aceptación y registro de bloqueos.
 - Esto reduce ambigüedades, acelera la coordinación y mejora la trazabilidad.

@@ -18,6 +18,19 @@ vi.mock('@abiel/shared', () => {
         dataStore.empresas.find((e: any) => e.id === where.id && e.tenantId === where.tenantId) || null,
       findMany: async ({ where }: any) =>
         dataStore.empresas.filter((e: any) => e.tenantId === where.tenantId)
+      ,
+      update: async ({ where, data }: any) => {
+        const idx = dataStore.empresas.findIndex((e: any) => e.id === where.id)
+        if (idx === -1) throw new Error('not found')
+        dataStore.empresas[idx] = { ...dataStore.empresas[idx], ...data }
+        return dataStore.empresas[idx]
+      },
+      delete: async ({ where }: any) => {
+        const idx = dataStore.empresas.findIndex((e: any) => e.id === where.id)
+        if (idx === -1) throw new Error('not found')
+        const [removed] = dataStore.empresas.splice(idx, 1)
+        return removed
+      }
     },
     usuario: {
       create: async ({ data }: any) => {
@@ -46,6 +59,24 @@ vi.mock('@abiel/shared', () => {
         dataStore.mensajes[idx] = { ...dataStore.mensajes[idx], ...data }
         return dataStore.mensajes[idx]
       }
+    },
+    buffer: {
+      create: async ({ data }: any) => {
+        const b = { id: genId('buf'), ...data }
+        dataStore.empresas.push({ ...b })
+        return b
+      },
+      findFirst: async ({ where }: any) =>
+        dataStore.empresas.find((e: any) => e.id === where.id && e.tenantId === where.tenantId) || null
+    },
+    plantilla: {
+      create: async ({ data }: any) => {
+        const p = { id: genId('tpl'), ...data }
+        dataStore.empresas.push({ ...p })
+        return p
+      },
+      findFirst: async ({ where }: any) =>
+        dataStore.empresas.find((e: any) => e.id === where.id && e.tenantId === where.tenantId) || null
     }
   }
 
@@ -69,7 +100,11 @@ import {
   crearMensaje,
   obtenerMensaje,
   marcarMensajeComoLeido,
-  listarMensajes
+  listarMensajes,
+  crearBuffer,
+  obtenerBuffer,
+  crearPlantilla,
+  obtenerPlantilla
 } from '../src/crud.example'
 
 describe('CRUD básico (mocked in-memory)', () => {
@@ -121,5 +156,26 @@ describe('CRUD básico (mocked in-memory)', () => {
 
     const eliminado = await eliminarEmpresa(tenant, empresaId)
     expect(eliminado).not.toBeNull()
+  })
+
+  it('gestiona buffers y plantillas con aislamiento por tenant', async () => {
+    const nuevaEmpresa = await crearEmpresa(tenant, 'Buffer Test')
+    const empresaBufferId = nuevaEmpresa.id
+
+    const buffer = await crearBuffer(tenant, empresaBufferId, 'pending', { step: 'validation' })
+    expect(buffer).not.toBeNull()
+    expect(buffer?.tenantId).toBe(tenant)
+
+    const bufferRecuperado = await obtenerBuffer(tenant, buffer!.id)
+    expect(bufferRecuperado).not.toBeNull()
+    expect(bufferRecuperado?.estado).toBe('pending')
+
+    const plantilla = await crearPlantilla(tenant, empresaBufferId, 'bienvenida', 'Hola, bienvenido')
+    expect(plantilla).not.toBeNull()
+    expect(plantilla?.tenantId).toBe(tenant)
+
+    const plantillaRecuperada = await obtenerPlantilla(tenant, plantilla!.id)
+    expect(plantillaRecuperada).not.toBeNull()
+    expect(plantillaRecuperada?.contenido).toContain('bienvenido')
   })
 })

@@ -3,12 +3,14 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "dev": "echo \"API dev server placeholder\"",
+    "dev": "node src/server.js",
     "build": "echo \"API build placeholder\"",
-    "test": "vitest"
+    "test": "vitest run"
   },
   "dependencies": {
-    "@abiel/shared": "workspace:*"
+    "@abiel/shared": "workspace:*",
+    "dotenv": "^17.4.2",
+    "fastify": "^5.2.0"
   },
   "devDependencies": {
     "vitest": "^1.0.0"

@@ -47,3 +47,25 @@ Se implementó la base de datos PostgreSQL con Prisma siguiendo arquitectura mul
 - **Documentación**: Guía en `prisma/README.md` con configuración, migraciones y mejores prácticas.
 - **Validaciones**: Todo filtro incluye `tenantId`; se valida acceso antes de cada operación; relaciones son explícitas sin inferencias.
 - **Próximos pasos**: Generar cliente Prisma (`npx prisma generate`), ejecutar migraciones en PostgreSQL local, y validar CRUD con datos reales.
+
+## 2026-07-22 15:00 (Arquitectura QA review)
+Se revisó el handoff de QA sobre tests del paquete API y CRUD multi-tenant con evidencia ejecutada en local. Resultado verificado:
+- La suite de tests del paquete API pasó: 1 archivo, 5 tests, 0 fallos.
+- El diseño actual aplica validaciones de acceso previas a operaciones de escritura y filtra por `tenantId` en lecturas, lo que es coherente con la arquitectura vigente.
+- No se detectó una falla arquitectónica crítica que obligue a bloquear el merge, pero sí riesgos operativos menores relacionados con la dependencia de mocks y con la necesidad de asegurar que las operaciones destructivas (`update`/`delete`) incluyan la validación de tenant en la cláusula `where` o en un mecanismo de acceso equivalente.
+
+Decisión arquitectónica:
+- Se aprueba el cambio como "Minor changes" con observaciones de seguimiento, sin requerir un cambio de arquitectura mayor ni un ticket de diseño inmediato.
+- Se recomienda cerrar las observaciones en una siguiente iteración con pruebas de integración reales y validaciones reforzadas en los puntos de escritura.
+
+## 2026-07-22 15:15
+Se estableció como estándar de identidad para toda la base de datos el uso de UUID en lugar de enteros secuenciales o identificadores basados en texto no normalizado.
+- Todas las entidades persistentes deberán usar UUID como identificador primario.
+- El módulo shared incorporará un componente dedicado para generación, normalización y validación de UUID.
+- Este criterio aplica a modelos de base de datos, contratos compartidos y operaciones de negocio del backend.
+
+## 2026-07-22 15:30
+Se definió un modelo de datos inicial para la API de mensajería con las tablas Empresa, Usuario, Mensaje, Buffer y Plantilla.
+- La tabla Empresa almacenará la configuración de la integración de WhatsApp vinculada a la empresa.
+- El modelo inicial usa UUID como identificador primario y mantiene `tenantId` como requisito para el aislamiento multi-tenant.
+- Buffer se incorpora como capa temporal para desacoplar ingestión y orquestación, mientras que Plantilla soporta respuestas predefinidas del canal.

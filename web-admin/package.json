@@ -3,7 +3,17 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "dev": "echo \"Web admin dev server placeholder\"",
-    "build": "echo \"Web admin build placeholder\""
+    "dev": "dotenv -e ../.env -- sh -c 'next dev --hostname 0.0.0.0 --port ${WEB_ADMIN_PORT:-5001}'",
+    "build": "next build",
+    "start": "dotenv -e ../.env -- sh -c 'next start --hostname 0.0.0.0 --port ${WEB_ADMIN_PORT:-5001}'"
+  },
+  "dependencies": {
+    "next": "14.2.15",
+    "react": "18.3.1",
+    "react-dom": "18.3.1"
+  },
+  "devDependencies": {
+    "@types/react": "19.2.17",
+    "dotenv-cli": "^7.4.2"
   }
 }
